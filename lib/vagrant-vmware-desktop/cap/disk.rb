@@ -17,7 +17,7 @@ module HashiCorp
         DEFAULT_DVD_BUS = "ide".freeze
         DEFAULT_DVD_DEVICE_TYPE = "cdrom-image"
         # Adapter types (from vmware-vdiskmanager -h)
-        DISK_ADAPTER_TYPES = ["ide", "buslogic", "lsilogic"].map(&:freeze).freeze
+        DISK_ADAPTER_TYPES = ["ide", "buslogic", "lsilogic", "pvscsi"].map(&:freeze).freeze
         DEFAULT_ADAPTER_TYPE = "lsilogic".freeze
         # Disk types (from vmware-vdiskmanager -h)
         # 0 : single growable virtual disk
@@ -120,7 +120,11 @@ module HashiCorp
           else
             if disk.type == :dvd
               all_disks.values.detect { |v| v["filename"] == disk.file }
-            else
+            #Whatever gets disks is now feeding items without filename
+            # {"filename"=>"disk.vmdk", "present"=>"TRUE", "redo"=>""}
+            # {"clientdevice"=>"TRUE", "devicetype"=>"cdrom-raw", "filename"=>"auto detect", "present"=>"TRUE"}
+            # {"redo"=>""}
+            elseif v["filename"]
               all_disks.values.detect do |v|
                 m_ext = File.extname(v["filename"])
                 m_fil = v["filename"].sub(/#{Regexp.escape(m_ext)}$/, "")
